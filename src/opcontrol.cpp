@@ -28,7 +28,7 @@ void handleIntakeControl(void* param) {
 void handleCataControl(void* param) {
     while (1) {
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) { // Launch cata once
-            Robot::launchCata(Robot::cata_intake_limit);
+            Robot::moveCataTo(Robot::cata_intake_limit);
         }
 
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) { // Toggle block intake and match load
@@ -41,8 +41,7 @@ void handleCataControl(void* param) {
 
 void handleControllerDisplay(void* param) {
     while (1) {
-        //controller.print(0, 0, "Cata Motor Temp:%.f      ", motor_cata.get_temperature());
-        //controller.print(0, 0, "%.f             ", motor_cata.get_actual_velocity());
+        controller.print(0, 0, "Cata Motor Temp:%.f      ", motor_cata.get_temperature());
         pros::delay(50);
     }
 }
@@ -55,9 +54,8 @@ void handleCataMotorSafety() {
             pros::delay(5);
             if (4000 == i) {
                 motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-                controller.rumble(".-.-.-.-");
             }
-            controller.print(0, 0, "%.0f, %i", motor_cata.get_actual_velocity(), i);
+            //controller.print(0, 0, "%.0f, %i                                   ", motor_cata.get_actual_velocity(), i);
         }
 
         pros::delay(5);
@@ -65,7 +63,8 @@ void handleCataMotorSafety() {
 }
 
 void opcontrol() {
-    pros::delay(1000);
+    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
+    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
 
     pros::Task task_handleDrivetrainControl(handleDrivetrainControl);
     pros::Task task_handleIntakeControl(handleIntakeControl);

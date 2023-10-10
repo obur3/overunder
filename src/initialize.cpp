@@ -2,8 +2,6 @@
 #include "initialize.h"
 #include "functions.h"
 
-// PUT MOTOR INITILIZATIONS HERE
-// PORTS WILL CHANGE
 pros::Motor motor_left1  (20, MOTOR_GEARSET_06, true);
 pros::Motor motor_left2  (19, MOTOR_GEARSET_06);
 pros::Motor motor_left3  (9, MOTOR_GEARSET_06, true);
@@ -16,13 +14,14 @@ pros::MotorGroup motorGroup_drivetrainLeft ({
     motor_left2,
     motor_left3
 });
+
 pros::MotorGroup motorGroup_drivetrainRight ({
     motor_right1,
     motor_right2,
     motor_right3
 });
 
-pros::IMU imu (6);
+pros::IMU imu (7);
 
 pros::Motor motor_intake   (8, MOTOR_GEARSET_06);
 pros::Motor motor_cata (17, MOTOR_GEARSET_36);
@@ -90,7 +89,7 @@ void displaySettingsGUI_3Line() {
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
                     pros::delay(1000);
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-                    Robot::launchCata(temp_cata_limit);
+                    Robot::moveCataTo(temp_cata_limit);
                 }
                 if (event==4) {
                     Robot::cata_intake_limit = temp_cata_limit;
@@ -116,7 +115,7 @@ void displaySettingsGUI_3Line() {
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
                     pros::delay(1000);
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-                    Robot::launchCata(temp_block_limit);
+                    Robot::moveCataTo(temp_block_limit);
                 }
                 if (event==4) {
                     Robot::block_intake_limit = temp_block_limit;
@@ -195,7 +194,7 @@ void displaySettingsGUI_1Line() {
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
                     pros::delay(1000);
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-                    Robot::launchCata(temp_cata_limit);
+                    Robot::moveCataTo(temp_cata_limit);
                 }
                 if (event==4) {
                     Robot::cata_intake_limit = temp_cata_limit;
@@ -217,7 +216,7 @@ void displaySettingsGUI_1Line() {
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
                     pros::delay(1000);
                     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-                    Robot::launchCata(temp_block_limit);
+                    Robot::moveCataTo(temp_block_limit);
                 }
                 if (event==4) {
                     Robot::block_intake_limit = temp_block_limit;
@@ -234,23 +233,47 @@ void displaySettingsGUI_1Line() {
         }
     }
 
-    pros::delay(50);
+    motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    pros::delay(250);
 
     controller.clear_line(0);
 }
 
+void printInfo() {
+    while (1) {
+        printf("%i, %f, %f\n", motorGroup_drivetrainLeft.get_target_velocities()[0], motorGroup_drivetrainLeft.get_actual_velocities()[0], motorGroup_drivetrainLeft.get_positions()[0]);
+        pros::delay(10);
+    }
+}
+
 void initialize() {
-    motorGroup_drivetrainLeft .set_zero_position(0);
-    motorGroup_drivetrainRight.set_zero_position(0);
+    motorGroup_drivetrainLeft .set_encoder_units(pros::E_MOTOR_ENCODER_COUNTS);
+    motorGroup_drivetrainRight.set_encoder_units(pros::E_MOTOR_ENCODER_COUNTS);
 
-    displaySettingsGUI_1Line();
+    motorGroup_drivetrainLeft .set_zero_position (0.0);
+    motorGroup_drivetrainRight.set_zero_position(0.0);
 
-    Robot::launchCata(Robot::cata_intake_limit); 
+    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
+    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
+
+    //displaySettingsGUI_1Line();
+
+    //pros::Task task_printInfo (printInfo);
+    imu.reset();
+    pros::delay(3000);
+
+    imu.set_data_rate(5);
+    pros::delay(6);
 }
 
 void disabled() {
     motorGroup_drivetrainLeft .brake();
     motorGroup_drivetrainRight.brake();
+
+    motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    motor_cata.brake();
+
+    motor_intake.brake();
 }
 
 void competition_initialize() {
