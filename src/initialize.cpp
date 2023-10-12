@@ -31,6 +31,7 @@ pros::Rotation odo_cata (18);
 pros::Controller controller (pros::E_CONTROLLER_MASTER);
 
 void displaySettingsGUI_3Line() {
+    Robot::deployIntake();
     controller.clear();
 
     int page_index = -1;
@@ -247,6 +248,8 @@ void printInfo() {
 }
 
 void initialize() {
+    Robot::retractIntake();
+
     motorGroup_drivetrainLeft .set_encoder_units(pros::E_MOTOR_ENCODER_COUNTS);
     motorGroup_drivetrainRight.set_encoder_units(pros::E_MOTOR_ENCODER_COUNTS);
 
@@ -256,7 +259,7 @@ void initialize() {
     motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
     motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 
-    //displaySettingsGUI_1Line();
+    //displaySettingsGUI_3Line();
 
     //pros::Task task_printInfo (printInfo);
     imu.reset();
@@ -264,6 +267,7 @@ void initialize() {
 
     imu.set_data_rate(5);
     pros::delay(6);
+    imu.tare();
 }
 
 void disabled() {

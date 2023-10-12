@@ -3,8 +3,12 @@
 
 namespace Robot {
 
-int cata_intake_limit                      = 31600;
+int cata_intake_limit                      = 32000;
 int block_intake_limit                     = 29000;
+bool isIntakeRetracted                     = true;
+bool isShtickDeployed                      = false;
+bool isWingsDeployed                       = false;
+bool isArmDeployed                         = true;
 
 void moveCataTo(int limit) {
     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
@@ -34,7 +38,7 @@ void moveCataTo(int limit) {
 void blockIntakeAndMatchLoad(int limit) {
     if (motor_cata.get_brake_mode() == pros::E_MOTOR_BRAKE_HOLD) {
         motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-        motor_cata.move(100);
+        motor_cata.move(127);
         while (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
             pros::delay(5);
         }
@@ -51,13 +55,15 @@ void blockIntake() {
     }};
 }
 
-void relaxIntake() {
+void relaxCata() {
     motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     motor_cata.brake();
 }
 
 void launchCataOnce() {
     pros::Task task{[=] {
+            motor_cata.move(127);
+            pros::delay(100);
             moveCataTo(cata_intake_limit);
     }};
 }
@@ -101,8 +107,8 @@ void driveForwardCounts(int counts, double target_heading) {
     motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
 
-    motorGroup_drivetrainLeft. move_voltage(8000);
-    motorGroup_drivetrainRight.move_voltage(8000);
+    motorGroup_drivetrainLeft. move_voltage(12000);
+    motorGroup_drivetrainRight.move_voltage(12000);
     while (motorGroup_drivetrainLeft.get_positions()[0] < counts-750) {
         pros::delay(5);
     }
@@ -116,7 +122,7 @@ void driveForwardCounts(int counts, double target_heading) {
     motorGroup_drivetrainLeft .brake();
     motorGroup_drivetrainRight.brake();
 
-    pros::delay(100);
+    pros::delay(25);
     controller.print(0, 0, "%f          ", motorGroup_drivetrainLeft.get_positions()[0]);
 }
 
@@ -125,19 +131,21 @@ void driveForwardInches(double inches, double target_heading) {
 }
 
 void driveForwardTime(int ms) {
-    motorGroup_drivetrainLeft. move_voltage(6000);
-    motorGroup_drivetrainRight.move_voltage(6000);
+    motorGroup_drivetrainLeft. move_voltage(7000);
+    motorGroup_drivetrainRight.move_voltage(7000);
     pros::delay(ms);
     motorGroup_drivetrainLeft .brake();
     motorGroup_drivetrainRight.brake();
+    pros::delay(25);
 }
 
 void driveBackwardTime(int ms) {
-    motorGroup_drivetrainLeft. move_voltage(-6000);
-    motorGroup_drivetrainRight.move_voltage(-6000);
+    motorGroup_drivetrainLeft. move_voltage(-7000);
+    motorGroup_drivetrainRight.move_voltage(-7000);
     pros::delay(ms);
     motorGroup_drivetrainLeft .brake();
     motorGroup_drivetrainRight.brake();
+    pros::delay(25);
 }
 
 void driveBackwardCounts(int counts, double target_heading) {
@@ -147,8 +155,8 @@ void driveBackwardCounts(int counts, double target_heading) {
     motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
 
-    motorGroup_drivetrainLeft. move_voltage(-8000);
-    motorGroup_drivetrainRight.move_voltage(-8000);
+    motorGroup_drivetrainLeft. move_voltage(-12000);
+    motorGroup_drivetrainRight.move_voltage(-12000);
     while (motorGroup_drivetrainLeft.get_positions()[0] > -counts+750) {
         pros::delay(5);
     }
@@ -162,7 +170,7 @@ void driveBackwardCounts(int counts, double target_heading) {
     motorGroup_drivetrainLeft .brake();
     motorGroup_drivetrainRight.brake();
 
-    pros::delay(100);
+    pros::delay(25);
     controller.print(0, 0, "%f          ", motorGroup_drivetrainLeft.get_positions()[0]);
 }
 
@@ -199,7 +207,7 @@ void rotateToHeading(double target_heading, bool reversed) {
 
     motorGroup_drivetrainLeft .brake();
     motorGroup_drivetrainRight.brake();
-    pros::delay(75);
+    pros::delay(25);
     controller.print(0,0,"%f             ", imu.get_heading());
 }
 
@@ -227,20 +235,84 @@ void disableIntake() {
     motor_intake.brake();
 }
 
-void deployShtick() {
+void deployIntake() {
+    pros::ADIDigitalOut piston_intake  ({{11, 'e'}});
+    piston_intake.set_value(false);
+    isIntakeRetracted = false;
+}
 
+void retractIntake() {
+    pros::ADIDigitalOut piston_intake  ({{11, 'e'}});
+    piston_intake.set_value(true);
+    isIntakeRetracted = true;
+}
+
+void toggleIntakeDeployment() {
+    if (isIntakeRetracted) {
+        deployIntake();
+    } else {
+        retractIntake();
+    }
+}
+
+void deployShtick() {
+    pros::ADIDigitalOut piston_shtick  ({{11, 'd'}});
+    piston_shtick.set_value(true);
+    isShtickDeployed = true;
 }
 
 void retractShtick() {
+    pros::ADIDigitalOut piston_shtick  ({{11, 'd'}});
+    piston_shtick.set_value(false);
+    isShtickDeployed = false;
+}
 
+void toggleShtickDeployment() {
+    if (isShtickDeployed) {
+        retractShtick();
+    } else {
+        deployShtick();
+    }
 }
 
 void deployWings() {
-
+    pros::ADIDigitalOut piston_wings   ({{11, 'c'}});
+    piston_wings.set_value(true);
+    isWingsDeployed = true;
 }
 
 void retractWings() {
+    pros::ADIDigitalOut piston_wings   ({{11, 'c'}});
+    piston_wings.set_value(false);
+    isWingsDeployed = false;
+}
 
+void toggleWingsDeployment() {
+    if (isWingsDeployed) {
+        retractWings();
+    } else {
+        deployWings();
+    }
+}
+
+void deployArm() {
+    pros::ADIDigitalOut piston_arm({{11, 'f'}});
+    piston_arm.set_value(true);
+    isArmDeployed = true;
+}
+
+void retractArm() {
+    pros::ADIDigitalOut piston_arm({{11, 'f'}});
+    piston_arm.set_value(false);
+    isArmDeployed = false;
+}
+
+void toggleArmDeployment() {
+    if (isArmDeployed) {
+        retractArm();
+    } else {
+        deployArm();
+    }
 }
 
 }

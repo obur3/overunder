@@ -62,13 +62,33 @@ void handleCataMotorSafety() {
     }
 }
 
+void handlePistonControl(void* param) {
+    while (1) {
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
+            Robot::toggleShtickDeployment();
+        }
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+            Robot::toggleIntakeDeployment();
+        }
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+            Robot::toggleWingsDeployment();
+        }
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+            Robot::toggleArmDeployment();
+        }
+
+        pros::delay(5);
+    }
+}
+
 void opcontrol() {
     motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
 
     pros::Task task_handleDrivetrainControl(handleDrivetrainControl);
-    pros::Task task_handleIntakeControl(handleIntakeControl);
-    pros::Task task_handleCataControl(handleCataControl);
+    pros::Task task_handleIntakeControl    (handleIntakeControl    );
+    pros::Task task_handleCataControl      (handleCataControl      );
     pros::Task task_handleControllerDisplay(handleControllerDisplay);
-    pros::Task task_handleCataMotorSafety(handleCataMotorSafety);
+    pros::Task task_handleCataMotorSafety  (handleCataMotorSafety  );
+    pros::Task task_handlePistonControl    (handlePistonControl    );
 }

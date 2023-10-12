@@ -21,4 +21,16 @@ namespace Robot {
     extern void reverseIntakeOnce      (void);
     extern void enableIntake           (void);
     extern void disableIntake          (void);
+    extern void deployIntake           (void);
+    extern void retractIntake          (void);
+    extern void toggleIntakeDeployment (void);
+    extern void deployShtick           (void);
+    extern void retractShtick          (void);
+    extern void toggleShtickDeployment (void);
+    extern void deployWings            (void);
+    extern void retractWings           (void);
+    extern void toggleWingsDeployment  (void);
+    extern void deployArm              (void);
+    extern void retractArm             (void);
+    extern void toggleArmDeployment    (void);
 }
