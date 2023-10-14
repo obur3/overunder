@@ -4,8 +4,10 @@
 
 void handleDrivetrainControl(void* param) {
     while (1) {
-        motorGroup_drivetrainLeft .move(controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
-        motorGroup_drivetrainRight.move(controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+        motorGroup_drivetrainLeft .move(
+            controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+        motorGroup_drivetrainRight.move(
+            controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
 
         pros::delay(5);
     }
@@ -27,11 +29,11 @@ void handleIntakeControl(void* param) {
 
 void handleCataControl(void* param) {
     while (1) {
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) { // Launch cata once
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
             Robot::moveCataTo(Robot::cata_intake_limit);
         }
 
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) { // Toggle block intake and match load
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
             Robot::blockIntakeAndMatchLoad(Robot::block_intake_limit);
         }
         
@@ -72,9 +74,6 @@ void handlePistonControl(void* param) {
         }
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
             Robot::toggleWingsDeployment();
-        }
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-            Robot::toggleArmDeployment();
         }
 
         pros::delay(5);

@@ -30,7 +30,4 @@ namespace Robot {
     extern void deployWings            (void);
     extern void retractWings           (void);
     extern void toggleWingsDeployment  (void);
-    extern void deployArm              (void);
-    extern void retractArm             (void);
-    extern void toggleArmDeployment    (void);
 }

@@ -295,24 +295,4 @@ void toggleWingsDeployment() {
     }
 }
 
-void deployArm() {
-    pros::ADIDigitalOut piston_arm({{11, 'f'}});
-    piston_arm.set_value(true);
-    isArmDeployed = true;
-}
-
-void retractArm() {
-    pros::ADIDigitalOut piston_arm({{11, 'f'}});
-    piston_arm.set_value(false);
-    isArmDeployed = false;
-}
-
-void toggleArmDeployment() {
-    if (isArmDeployed) {
-        retractArm();
-    } else {
-        deployArm();
-    }
-}
-
 }
