@@ -8,6 +8,7 @@ namespace Robot {
     extern void moveCataTo             (int limit);
     extern void blockIntakeAndMatchLoad(int limit);
     extern void launchCataOnce         (void);
+    extern void matchLoadCata          (int times);
     extern void blockIntake            (void);
     extern void relaxCata              (void);
     extern void driveForwardCounts     (int counts,   double target_heading);

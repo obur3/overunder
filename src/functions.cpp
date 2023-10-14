@@ -68,6 +68,13 @@ void launchCataOnce() {
     }};
 }
 
+void matchLoadCata(int times) {
+    for (int i=0; i<times; i++) {
+        moveCataTo(cata_intake_limit);
+        pros::delay(250);
+    }
+}
+
 void testMotors() {
     motor_left1.move(127);
     pros::delay(250);
