@@ -2,30 +2,29 @@
 #include "initialize.h"
 #include "functions.h"
 
-void throwy_auton() {
+/* void throwy_auton() {
     Robot::deployIntake();
     Robot::driveBackwardInches(45, 0.0);
     Robot::rotateToHeading(270, true); // face goal
     Robot::reverseIntakeOnce(); // spit out match load
-    Robot::launchCataOnce(); // put cata down
     Robot::driveForwardInches (9, 270);
-    Robot::deployShtick(); // shtick around triball 1
+    Robot::deployWings(); // shtick around triball 1
+    Robot::launchCataOnce(); // put cata down
     Robot::rotateToHeading(0, false);
     Robot::rotateToHeading(90, false); // put front towards goal
     Robot::enableIntake();
-    Robot::driveForwardInches(18, 180);
-    Robot::retractShtick();
+    Robot::driveForwardTime(500);
+    Robot::retractWings();
     Robot::driveBackwardInches(26, 180);
-    Robot::rotateToHeading(212, false);
-    /* pros::Task task{[=] { // launch cata during move
+    Robot::rotateToHeading(218, false);
+    pros::Task task{[=] { // launch cata during move
         pros::delay(600);
         Robot::launchCataOnce();
-    }}; */
-    Robot::driveBackwardInches(40, 200);
+    }};
+    Robot::driveBackwardInches(54, 200);
 }
 
 void pushy_auton() {
-    Robot::deployIntake();
     Robot::driveForwardInches(31, 0); // line up with triball 1 and push match load
     Robot::blockIntake();
     Robot::rotateToHeading(90, false); // face intake to triball 1
@@ -39,13 +38,10 @@ void pushy_auton() {
     Robot::driveBackwardInches(18, 0); // pickup triball 2
     Robot::rotateToHeading(270, false);
     Robot::reverseIntakeOnce(); // spit out triball 2
-    Robot::rotateToHeading(110, true);
-    Robot::enableIntake();
-    Robot::driveBackwardTime(400); // pickup triball 3
-    Robot::driveForwardInches(10, 110);
-    Robot::rotateToHeading(270, false);
-    Robot::reverseIntakeOnce(); // spit out triball 3
-    pros::delay(350);
+    //Robot::rotateToHeading(110, true);
+    //Robot::enableIntake();
+    //Robot::driveBackwardTime(400); // pickup triball 3
+    //Robot::driveForwardInches(10, 110);
     Robot::rotateToHeading(90, false);
     Robot::deployWings();
     Robot::driveForwardTime(700); // shove everything in
@@ -53,12 +49,13 @@ void pushy_auton() {
 
 void skills_auton() {
     Robot::deployIntake();
-    Robot::driveBackwardInches(18, 0);
-    Robot::rotateToHeading(225, false);
-    Robot::driveBackwardTime(800);
-    //Robot::launchCataOnce();
-}
+    pros::delay(250);
+    Robot::deployWings();
+    pros::delay(250);
+    Robot::driveForwardInches(8, 0);
+    Robot::matchLoadCata(56);
+} */
 
 void autonomous() {
-    throwy_auton();
+    
 }

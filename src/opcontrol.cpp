@@ -29,14 +29,15 @@ void handleIntakeControl(void* param) {
 
 void handleCataControl(void* param) {
     while (1) {
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-            Robot::moveCataTo(Robot::cata_intake_limit);
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+            Robot::launchCataOnce();
         }
-
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
-            Robot::blockIntakeAndMatchLoad(Robot::block_intake_limit);
+            Robot::lowerCata();
         }
-        
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+            motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+        }
         pros::delay(5);
     }
 }
@@ -48,31 +49,9 @@ void handleControllerDisplay(void* param) {
     }
 }
 
-void handleCataMotorSafety() {
-    while (1) {
-        int i = 0;
-        while (motor_cata.get_actual_velocity() == 0) {
-            i++;
-            pros::delay(5);
-            if (4000 == i) {
-                motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-            }
-            //controller.print(0, 0, "%.0f, %i                                   ", motor_cata.get_actual_velocity(), i);
-        }
-
-        pros::delay(5);
-    }
-}
-
 void handlePistonControl(void* param) {
     while (1) {
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
-            Robot::toggleShtickDeployment();
-        }
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
-            Robot::toggleIntakeDeployment();
-        }
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
             Robot::toggleWingsDeployment();
         }
 
@@ -88,6 +67,5 @@ void opcontrol() {
     pros::Task task_handleIntakeControl    (handleIntakeControl    );
     pros::Task task_handleCataControl      (handleCataControl      );
     pros::Task task_handleControllerDisplay(handleControllerDisplay);
-    pros::Task task_handleCataMotorSafety  (handleCataMotorSafety  );
     pros::Task task_handlePistonControl    (handlePistonControl    );
 }

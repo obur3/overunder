@@ -3,76 +3,31 @@
 
 namespace Robot {
 
-int cata_intake_limit                      = 32000;
-int block_intake_limit                     = 29000;
-bool isIntakeRetracted                     = true;
-bool isShtickDeployed                      = false;
-bool isWingsDeployed                       = false;
-bool isArmDeployed                         = true;
-
-void moveCataTo(int limit) {
-    motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
-    motor_cata.move(127);
-
-    pros::delay(250);
-
-    int time = 0;
-
-    while (odo_cata.get_angle() < limit) {
-        pros::delay(3);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 2, "%d   ", odo_cata.get_angle());
-        time += 1;
-
-        if (time > 1000) {
-            motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-            break;
-        }
-    }
-
-    pros::delay(45);
-
-    motor_cata.brake();
-}
-
-void blockIntakeAndMatchLoad(int limit) {
-    if (motor_cata.get_brake_mode() == pros::E_MOTOR_BRAKE_HOLD) {
-        motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-        motor_cata.move(127);
-        while (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-            pros::delay(5);
-        }
-        motor_cata.brake();
-        return;
-    }
-
-    moveCataTo(limit);
-}
-
-void blockIntake() {
-    pros::Task task{[=] {
-        moveCataTo(block_intake_limit);
-    }};
-}
-
-void relaxCata() {
-    motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-    motor_cata.brake();
-}
+bool isWingsDeployed = false;
 
 void launchCataOnce() {
     pros::Task task{[=] {
+            motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
             motor_cata.move(127);
-            pros::delay(100);
-            moveCataTo(cata_intake_limit);
+            pros::delay(500);
+            motor_cata.brake();
+            
     }};
 }
 
 void matchLoadCata(int times) {
     for (int i=0; i<times; i++) {
-        moveCataTo(cata_intake_limit);
-        pros::delay(250);
+        launchCataOnce();
     }
+}
+
+void lowerCata() {
+    pros::Task task{[=] {
+        motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+            motor_cata.move(127);
+            pros::delay(250);
+            motor_cata.brake();
+    }};
 }
 
 void testMotors() {
@@ -242,54 +197,14 @@ void disableIntake() {
     motor_intake.brake();
 }
 
-void deployIntake() {
-    pros::ADIDigitalOut piston_intake  ({{11, 'e'}});
-    piston_intake.set_value(false);
-    isIntakeRetracted = false;
-}
-
-void retractIntake() {
-    pros::ADIDigitalOut piston_intake  ({{11, 'e'}});
-    piston_intake.set_value(true);
-    isIntakeRetracted = true;
-}
-
-void toggleIntakeDeployment() {
-    if (isIntakeRetracted) {
-        deployIntake();
-    } else {
-        retractIntake();
-    }
-}
-
-void deployShtick() {
-    pros::ADIDigitalOut piston_shtick  ({{11, 'd'}});
-    piston_shtick.set_value(true);
-    isShtickDeployed = true;
-}
-
-void retractShtick() {
-    pros::ADIDigitalOut piston_shtick  ({{11, 'd'}});
-    piston_shtick.set_value(false);
-    isShtickDeployed = false;
-}
-
-void toggleShtickDeployment() {
-    if (isShtickDeployed) {
-        retractShtick();
-    } else {
-        deployShtick();
-    }
-}
-
 void deployWings() {
-    pros::ADIDigitalOut piston_wings   ({{11, 'c'}});
+    pros::ADIDigitalOut piston_wings  ({{11, 'b'}});
     piston_wings.set_value(true);
     isWingsDeployed = true;
 }
 
 void retractWings() {
-    pros::ADIDigitalOut piston_wings   ({{11, 'c'}});
+    pros::ADIDigitalOut piston_wings  ({{11, 'b'}});
     piston_wings.set_value(false);
     isWingsDeployed = false;
 }
