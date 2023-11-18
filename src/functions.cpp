@@ -1,33 +1,47 @@
 #include "main.h"
 #include "initialize.h"
 
-namespace Robot {
+pros::Motor motor_left1  (2, MOTOR_GEARSET_06, true);
+pros::Motor motor_left2  (3, MOTOR_GEARSET_06, true);
+pros::Motor motor_left3  (4, MOTOR_GEARSET_18, true);
+pros::Motor motor_right1 (9, MOTOR_GEARSET_06);
+pros::Motor motor_right2 (8, MOTOR_GEARSET_06);
+pros::Motor motor_right3 (7, MOTOR_GEARSET_18);
 
-bool isWingsDeployed = false;
+pros::MotorGroup motorGroup_drivetrainLeft ({
+    motor_left1,
+    motor_left2,
+    motor_left3
+});
 
-void launchCataOnce() {
-    pros::Task task{[=] {
-            motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-            motor_cata.move(127);
-            pros::delay(500);
-            motor_cata.brake();
-            
-    }};
+pros::MotorGroup motorGroup_drivetrainRight ({
+    motor_right1,
+    motor_right2,
+    motor_right3
+});
+
+pros::IMU imu (20);
+
+pros::Motor motor_intake_left (1, MOTOR_GEARSET_18);
+pros::Motor motor_intake_right(10, MOTOR_GEARSET_18, true);
+pros::MotorGroup motorGroup_intake({
+    motor_intake_left,
+    motor_intake_right
+});
+
+pros::Motor motor_lift(5, MOTOR_GEARSET_36, true);
+
+pros::Motor motor_kicker(6, MOTOR_GEARSET_6);
+
+int inches(double in) {
+    return std::round(in * 44.4);
 }
 
-void matchLoadCata(int times) {
-    for (int i=0; i<times; i++) {
-        launchCataOnce();
-    }
-}
+namespace Robot { 
 
-void lowerCata() {
-    pros::Task task{[=] {
-        motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-            motor_cata.move(127);
-            pros::delay(250);
-            motor_cata.brake();
-    }};
+void resetIMU() {
+    imu.reset();
+    pros::delay(3000);
 }
 
 void testMotors() {
@@ -62,82 +76,95 @@ void testMotors() {
     pros::delay(250);
 }
 
-void driveForwardCounts(int counts, double target_heading) {
-    motorGroup_drivetrainLeft. tare_position();
-    motorGroup_drivetrainRight.tare_position();
-
+void drive(double left, double right) {
     motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
-
-    motorGroup_drivetrainLeft. move_voltage(12000);
-    motorGroup_drivetrainRight.move_voltage(12000);
-    while (motorGroup_drivetrainLeft.get_positions()[0] < counts-750) {
-        pros::delay(5);
-    }
-    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
-    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
-    motorGroup_drivetrainLeft. move_voltage(3000);
-    motorGroup_drivetrainRight.move_voltage(3000);
-    while (motorGroup_drivetrainLeft.get_positions()[0] < counts-45) {
-        pros::delay(5);
-    }
-    motorGroup_drivetrainLeft .brake();
-    motorGroup_drivetrainRight.brake();
-
-    pros::delay(25);
-    controller.print(0, 0, "%f          ", motorGroup_drivetrainLeft.get_positions()[0]);
+    motorGroup_drivetrainLeft .move(left);
+    motorGroup_drivetrainRight.move(right);
 }
 
-void driveForwardInches(double inches, double target_heading) {
-    driveForwardCounts(inches * 42.9676812887, target_heading);
-}
-
-void driveForwardTime(int ms) {
-    motorGroup_drivetrainLeft. move_voltage(7000);
-    motorGroup_drivetrainRight.move_voltage(7000);
-    pros::delay(ms);
-    motorGroup_drivetrainLeft .brake();
-    motorGroup_drivetrainRight.brake();
-    pros::delay(25);
-}
-
-void driveBackwardTime(int ms) {
-    motorGroup_drivetrainLeft. move_voltage(-7000);
-    motorGroup_drivetrainRight.move_voltage(-7000);
-    pros::delay(ms);
-    motorGroup_drivetrainLeft .brake();
-    motorGroup_drivetrainRight.brake();
-    pros::delay(25);
-}
-
-void driveBackwardCounts(int counts, double target_heading) {
-    motorGroup_drivetrainLeft. tare_position();
+void resetOdometer() {
+    motorGroup_drivetrainLeft .tare_position();
     motorGroup_drivetrainRight.tare_position();
+}
 
+void accelerate(double left, double right, int ms) {
     motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
     motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
-
-    motorGroup_drivetrainLeft. move_voltage(-12000);
-    motorGroup_drivetrainRight.move_voltage(-12000);
-    while (motorGroup_drivetrainLeft.get_positions()[0] > -counts+750) {
-        pros::delay(5);
+    for (int i = 0; i < ms; i+=2) {
+        motorGroup_drivetrainLeft .move((left*i)/ms);
+        motorGroup_drivetrainRight.move((right*i)/ms);
+        pros::delay(2);
     }
-    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
-    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
-    motorGroup_drivetrainLeft. move_voltage(-3000);
-    motorGroup_drivetrainRight.move_voltage(-3000);
-    while (motorGroup_drivetrainLeft.get_positions()[0] > -counts+45) {
-        pros::delay(5);
-    }
-    motorGroup_drivetrainLeft .brake();
-    motorGroup_drivetrainRight.brake();
-
-    pros::delay(25);
-    controller.print(0, 0, "%f          ", motorGroup_drivetrainLeft.get_positions()[0]);
 }
 
-void driveBackwardInches(double inches, double target_heading) {
-    driveBackwardCounts(inches * 42.9676812887, target_heading);
+void brake() {
+    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
+    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
+    motorGroup_drivetrainLeft .brake();
+    motorGroup_drivetrainRight.brake();
+    motorGroup_drivetrainLeft.move(0);
+    motorGroup_drivetrainRight.move(0);
+}
+
+void waitUntilRightDistance(int target_counts) {
+    double starting_counts = motor_left2.get_position();
+
+    if (target_counts > starting_counts) {
+        while (motor_left2.get_position() < target_counts) {
+            pros::delay(5);
+        }
+    } else {
+        while (motor_left2.get_position() > target_counts) {
+            pros::delay(5);
+        }
+    }
+}
+
+void waitUntilLeftDistance(int target_counts) {
+    double starting_counts = motor_left1.get_position();
+
+    int safety = 0;
+
+    if (target_counts > starting_counts) {
+        while (motor_left1.get_position() < target_counts) {
+            pros::delay(5);
+            safety++;
+            if (safety > 600) {
+                return;
+            }
+        }
+    } else {
+        while (motor_left1.get_position() > target_counts) {
+            pros::delay(5);
+            safety++;
+            if (safety > 600) {
+                return;
+            }
+        }
+    }
+}
+
+void creepToDistance(int target_counts) {
+    int braking_dist = 44;
+
+    double starting_counts = motor_left1.get_position();
+
+    int direction = target_counts > starting_counts ? 1 : -1;
+
+    drive(18 * direction, 18 * direction);
+    waitUntilLeftDistance(direction > 0 ? target_counts-braking_dist : target_counts+braking_dist);
+    brake();
+}
+
+void creepForTime(bool isForward, int ms) {
+    double starting_counts = motor_left1.get_position();
+
+    int direction = isForward ? 1 : -1;
+
+    drive(18 * direction, 18 * direction);
+    pros::delay(ms);
+    brake();
 }
 
 void rotateToHeading(double target_heading, bool reversed) {
@@ -147,8 +174,8 @@ void rotateToHeading(double target_heading, bool reversed) {
     double current_heading = imu.get_heading();
     double starting_heading = current_heading;
 
-    int voltage              = reversed? -3500 : 3450;
-    int overshoot_correction = reversed? 15 : 10;
+    int voltage              = reversed? -3500 : 3500;
+    int overshoot_correction = reversed? 13 : 13;
 
     while (1) {
         pros::delay(6);
@@ -169,51 +196,82 @@ void rotateToHeading(double target_heading, bool reversed) {
 
     motorGroup_drivetrainLeft .brake();
     motorGroup_drivetrainRight.brake();
-    pros::delay(25);
+    pros::delay(200);
     controller.print(0,0,"%f             ", imu.get_heading());
-}
-
-void intakeOnce() {
-    pros::Task task{[=] {
-            motor_intake.move(127);
-        pros::delay(400);
-        motor_intake.brake();
-    }};
-}
-
-void reverseIntakeOnce() {
-    pros::Task task{[=] {
-        motor_intake.move(-127);
-        pros::delay(400);
-        motor_intake.brake();
-    }};
+    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
+    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
 }
 
 void enableIntake() {
-    motor_intake.move(127);
+    motorGroup_intake.move(127);
+}
+
+void reverseIntake() {
+    motorGroup_intake.move(-127);
+}
+
+void reverseIntakeSlow() {
+    motorGroup_intake.move(-80);
 }
 
 void disableIntake() {
-    motor_intake.brake();
+    motorGroup_intake.brake();
 }
 
-void deployWings() {
-    pros::ADIDigitalOut piston_wings  ({{11, 'b'}});
-    piston_wings.set_value(true);
-    isWingsDeployed = true;
+void launchKickerOnce() {
+    motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    motor_kicker.move(90);
+    pros::delay(500);
+    motor_kicker.move(0);
 }
 
-void retractWings() {
-    pros::ADIDigitalOut piston_wings  ({{11, 'b'}});
-    piston_wings.set_value(false);
-    isWingsDeployed = false;
+void moveLift(int mult) {
+    motor_lift.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    motor_lift.move(mult);
+    if (mult == 0) {
+        motor_lift.brake();
+    }
 }
 
-void toggleWingsDeployment() {
-    if (isWingsDeployed) {
-        retractWings();
+pros::ADIDigitalOut piston_arm         ('a', true);
+pros::ADIDigitalOut piston_parkingBrake('b', false);
+
+extern bool isArmDeployed         = false;
+extern bool isParkingBrakeEngaged = false;
+
+void deployArm() {
+    isArmDeployed = true;
+    piston_arm.set_value(false);
+}
+
+void retractArm() {
+    isArmDeployed = false;
+    piston_arm.set_value(true);
+}
+
+void toggleArmDeployment() {
+    if (isArmDeployed) {
+        retractArm();
     } else {
-        deployWings();
+        deployArm();
+    }
+}
+
+void engageParkingBrake() {
+    isParkingBrakeEngaged = true;
+    piston_parkingBrake.set_value(true);
+}
+
+void disengageParkingBrake() {
+    isParkingBrakeEngaged = false;
+    piston_parkingBrake.set_value(false);
+}
+
+void toggleParkingBrakeEngage() {
+    if (isParkingBrakeEngaged) {
+        disengageParkingBrake();
+    } else {
+        engageParkingBrake();
     }
 }
 

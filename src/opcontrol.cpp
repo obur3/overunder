@@ -4,10 +4,10 @@
 
 void handleDrivetrainControl(void* param) {
     while (1) {
-        motorGroup_drivetrainLeft .move(
-            controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
-        motorGroup_drivetrainRight.move(
-            controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+        Robot::drive(
+            controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y),
+            controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)
+        );
 
         pros::delay(5);
     }
@@ -16,56 +16,66 @@ void handleDrivetrainControl(void* param) {
 void handleIntakeControl(void* param) {
     while (1) {
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-            motor_intake.move(127);
+            Robot::enableIntake();
         } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-            motor_intake.move(-127);
+            Robot::reverseIntake();
         } else {
-            motor_intake.brake();
+            Robot::disableIntake();
         }
 
         pros::delay(5);
     }
 }
 
-void handleCataControl(void* param) {
+void handleKickerControl(void* param) {
+    pros::Motor motor_kicker(6, MOTOR_GEARSET_6);
     while (1) {
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-            Robot::launchCataOnce();
-        }
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
-            Robot::lowerCata();
-        }
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
-            motor_cata.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+            motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+            motor_kicker.move(127);
+        } else {
+            motor_kicker.brake();
         }
         pros::delay(5);
     }
 }
 
-void handleControllerDisplay(void* param) {
+void handleLiftControl(void* param) {
+    int mult = 0;
     while (1) {
-        controller.print(0, 0, "Cata Motor Temp:%.f      ", motor_cata.get_temperature());
-        pros::delay(50);
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+            mult = 127;
+        }
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+            mult = -127;
+        } else {
+            mult = 0;
+        }
+        Robot::moveLift(mult);
+        pros::delay(5);
     }
 }
 
 void handlePistonControl(void* param) {
     while (1) {
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
-            Robot::toggleWingsDeployment();
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+            Robot::disengageParkingBrake();
+        } 
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+            Robot::engageParkingBrake();
         }
-
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
+            Robot::toggleArmDeployment();
+        }
         pros::delay(5);
     }
 }
 
 void opcontrol() {
-    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
-    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
-
     pros::Task task_handleDrivetrainControl(handleDrivetrainControl);
     pros::Task task_handleIntakeControl    (handleIntakeControl    );
-    pros::Task task_handleCataControl      (handleCataControl      );
-    pros::Task task_handleControllerDisplay(handleControllerDisplay);
-    pros::Task task_handlePistonControl    (handlePistonControl    );
+    pros::Task task_handleCataControl      (handleKickerControl    );
+    pros::Task task_handleLiftControl      (handleLiftControl      );
+    pros::Task task_handlePistonConrol     (handlePistonControl    );
+    
 }

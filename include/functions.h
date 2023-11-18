@@ -1,26 +1,34 @@
 #include "main.h"
 #include "initialize.h"
 
-namespace Robot {
-    extern int cata_intake_limit;
-    extern int block_intake_limit;
+extern int  inches(double in);
 
-    extern void launchCataOnce         (void);
-    extern void matchLoadCata          (int times);
-    extern void lowerCata              (void);
-    extern void blockIntake            (void);
-    extern void driveForwardCounts     (int counts,    double target_heading);
-    extern void driveForwardInches     (double inches, double target_heading);
-    extern void driveBackwardCounts    (int counts,    double target_heading);
-    extern void driveBackwardInches    (double inches, double target_heading);
-    extern void driveForwardTime       (int ms);
-    extern void driveBackwardTime      (int ms);
-    extern void rotateToHeading        (double target_heading, bool reversed=false);
-    extern void intakeOnce             (void);
-    extern void reverseIntakeOnce      (void);
-    extern void enableIntake           (void);
-    extern void disableIntake          (void);
-    extern void deployWings            (void);
-    extern void retractWings           (void);
-    extern void toggleWingsDeployment  (void);
+namespace Robot { 
+    extern void resetIMU                (void);
+    extern void testMotors              (void);
+    extern void resetOdometer           (void);
+    extern void drive                   (double left, double right);
+    extern void accelerate              (double left, double right, int ms);
+    extern void brake                   (void);
+    extern void waitUntilLeftDistance   (int target_counts);
+    extern void waitUntilRightDistance  (int target_counts);
+    extern void creepToDistance         (int target_counts);
+    extern void creepForTime            (bool isForward, int ms);
+    extern void rotateToHeading         (double target_heading, bool reversed=false);
+    extern void enableIntake            (void);
+    extern void reverseIntake           (void);
+    extern void reverseIntakeSlow       (void);
+    extern void disableIntake           (void);
+    extern void launchKickerOnce        (void);
+    extern void moveLift                (int mult);
+ 
+    extern bool isArmDeployed; 
+    extern bool isParkingBrakeEngaged; 
+    extern void deployArm               (void);
+    extern void retractArm              (void);
+    extern void toggleArmDeployment     (void);
+    extern void engageParkingBrake      (void);
+    extern void disengageParkingBrake   (void);
+    extern void toggleParkingBrakeEngage(void);
+
 }
