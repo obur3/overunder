@@ -22,7 +22,7 @@ pros::MotorGroup motorGroup_drivetrainRight ({
 
 pros::IMU imu (20);
 
-pros::Motor motor_intake_left (1, MOTOR_GEARSET_18);
+pros::Motor motor_intake_left (11, MOTOR_GEARSET_18);
 pros::Motor motor_intake_right(10, MOTOR_GEARSET_18, true);
 pros::MotorGroup motorGroup_intake({
     motor_intake_left,
@@ -42,6 +42,10 @@ namespace Robot {
 void resetIMU() {
     imu.reset();
     pros::delay(3000);
+}
+
+void setHeading(double heading) {
+    imu.set_heading(heading);
 }
 
 void testMotors() {
@@ -113,10 +117,12 @@ void waitUntilRightDistance(int target_counts) {
     if (target_counts > starting_counts) {
         while (motor_left2.get_position() < target_counts) {
             pros::delay(5);
+            controller.print(0, 0, "%f          ", motor_left1.get_position()/44.4);
         }
     } else {
         while (motor_left2.get_position() > target_counts) {
             pros::delay(5);
+            controller.print(0, 0, "%f          ", motor_left1.get_position()/44.4);
         }
     }
 }
@@ -133,6 +139,7 @@ void waitUntilLeftDistance(int target_counts) {
             if (safety > 600) {
                 return;
             }
+            controller.print(0, 0, "%f          ", motor_left1.get_position()/44.4);
         }
     } else {
         while (motor_left1.get_position() > target_counts) {
@@ -141,6 +148,7 @@ void waitUntilLeftDistance(int target_counts) {
             if (safety > 600) {
                 return;
             }
+            controller.print(0, 0, "%f          ", motor_left1.get_position()/44.4);
         }
     }
 }
@@ -168,14 +176,11 @@ void creepForTime(bool isForward, int ms) {
 }
 
 void rotateToHeading(double target_heading, bool reversed) {
-    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
-    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
-
     double current_heading = imu.get_heading();
     double starting_heading = current_heading;
 
     int voltage              = reversed? -3500 : 3500;
-    int overshoot_correction = reversed? 13 : 13;
+    int overshoot_correction = reversed? 15 : 15;
 
     while (1) {
         pros::delay(6);
@@ -194,12 +199,9 @@ void rotateToHeading(double target_heading, bool reversed) {
             }
     }
 
-    motorGroup_drivetrainLeft .brake();
-    motorGroup_drivetrainRight.brake();
+    Robot::brake();
     pros::delay(200);
     controller.print(0,0,"%f             ", imu.get_heading());
-    motorGroup_drivetrainLeft .set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
-    motorGroup_drivetrainRight.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
 }
 
 void enableIntake() {
@@ -221,6 +223,13 @@ void disableIntake() {
 void launchKickerOnce() {
     motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     motor_kicker.move(90);
+    pros::delay(500);
+    motor_kicker.move(0);
+}
+
+void launchKickerFast() {
+    motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+    motor_kicker.move(127);
     pros::delay(500);
     motor_kicker.move(0);
 }

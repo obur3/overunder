@@ -5,6 +5,7 @@ extern int  inches(double in);
 
 namespace Robot { 
     extern void resetIMU                (void);
+    extern void setHeading              (double heading);
     extern void testMotors              (void);
     extern void resetOdometer           (void);
     extern void drive                   (double left, double right);
@@ -20,6 +21,7 @@ namespace Robot {
     extern void reverseIntakeSlow       (void);
     extern void disableIntake           (void);
     extern void launchKickerOnce        (void);
+    extern void launchKickerFast        (void);
     extern void moveLift                (int mult);
  
     extern bool isArmDeployed; 
