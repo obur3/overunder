@@ -31,7 +31,8 @@ pros::MotorGroup motorGroup_intake({
 
 pros::Motor motor_lift(5, MOTOR_GEARSET_36, true);
 
-pros::Motor motor_kicker(6, MOTOR_GEARSET_6);
+pros::Motor motor_kicker(6, MOTOR_GEARSET_6, false);
+pros::Rotation rot_kicker(18);
 
 int inches(double in) {
     return std::round(in * 44.4);
@@ -130,24 +131,14 @@ void waitUntilRightDistance(int target_counts) {
 void waitUntilLeftDistance(int target_counts) {
     double starting_counts = motor_left1.get_position();
 
-    int safety = 0;
-
     if (target_counts > starting_counts) {
         while (motor_left1.get_position() < target_counts) {
             pros::delay(5);
-            safety++;
-            if (safety > 600) {
-                return;
-            }
             controller.print(0, 0, "%f          ", motor_left1.get_position()/44.4);
         }
     } else {
         while (motor_left1.get_position() > target_counts) {
             pros::delay(5);
-            safety++;
-            if (safety > 600) {
-                return;
-            }
             controller.print(0, 0, "%f          ", motor_left1.get_position()/44.4);
         }
     }
@@ -220,18 +211,39 @@ void disableIntake() {
     motorGroup_intake.brake();
 }
 
-void launchKickerOnce() {
-    motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-    motor_kicker.move(90);
-    pros::delay(500);
-    motor_kicker.move(0);
+void runKicker() {
+    motor_kicker.move_voltage(12000);
 }
 
-void launchKickerFast() {
+void brakeKicker() {
+    motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    motor_kicker.brake();
+}
+
+void coastKicker() {
     motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-    motor_kicker.move(127);
-    pros::delay(500);
-    motor_kicker.move(0);
+    motor_kicker.brake();
+}
+
+void runKickerForTime(int ms) {
+    runKicker();
+    pros::delay(ms);
+    brakeKicker();
+}
+
+void resetKickerSensor() {
+    rot_kicker.reset_position();
+    rot_kicker.set_data_rate(5);
+}
+
+void runKickerToRotation(int rotation) {
+    runKicker();
+    int pos = rot_kicker.get_position();
+    while (pos < rotation) {
+        pros::delay(6);
+        pos = rot_kicker.get_position();
+    }
+    brakeKicker();
 }
 
 void moveLift(int mult) {
@@ -244,9 +256,12 @@ void moveLift(int mult) {
 
 pros::ADIDigitalOut piston_arm         ('a', true);
 pros::ADIDigitalOut piston_parkingBrake('b', false);
+pros::ADIDigitalOut piston_leftWing    ('c', false);
+pros::ADIDigitalOut piston_rightWing   ('d', false);
 
 extern bool isArmDeployed         = false;
 extern bool isParkingBrakeEngaged = false;
+extern bool isWingsDeployed       = false;
 
 void deployArm() {
     isArmDeployed = true;
@@ -281,6 +296,26 @@ void toggleParkingBrakeEngage() {
         disengageParkingBrake();
     } else {
         engageParkingBrake();
+    }
+}
+
+void deployWings() {
+    isWingsDeployed = true;
+    piston_leftWing .set_value(true);
+    piston_rightWing.set_value(true);
+}
+
+void retractWings() {
+    isWingsDeployed = false;
+    piston_leftWing .set_value(false);
+    piston_rightWing.set_value(false);
+}
+
+void toggleWingDeployment() {
+    if (isWingsDeployed) {
+        retractWings();
+    } else {
+        deployWings();
     }
 }
 

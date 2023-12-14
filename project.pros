@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "skills",
+    "project_name": "WP: new close",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -309,7 +309,7 @@
       }
     },
     "upload_options": {
-      "slot": 8,
+      "slot": 1,
       "description": "My PROS Project"
     }
   }

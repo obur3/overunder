@@ -20,18 +20,17 @@ void handleIntakeControl() {
 }
 
 void handleKickerControl() {
-    pros::Motor motor_kicker(6, MOTOR_GEARSET_6);
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-        motor_kicker.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        motor_kicker.move(127);
+        Robot::runKicker();
     } else {
-        motor_kicker.brake();
+        Robot::brakeKicker();
     }
 }
 
 void handleLiftControl() {
     int mult = 0;
-    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP) ||
+        controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
         mult = 127;
     }
     else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)) {
@@ -52,13 +51,16 @@ void handlePistonControl() {
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
         Robot::toggleArmDeployment();
     }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+        Robot::toggleWingDeployment();
+    }
 }
 
 void opcontrol() {
     while (1) {
         handleDrivetrainControl();
-        handleIntakeControl();
         handleKickerControl();
+        handleIntakeControl();
         handleLiftControl();
         handlePistonControl();
         pros::delay(5);

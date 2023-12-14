@@ -6,6 +6,7 @@ pros::Controller controller (pros::E_CONTROLLER_MASTER);
 
 void initialize() {
     Robot::resetIMU();
+    Robot::resetKickerSensor();
 }
 
 void competition_initialize() {

@@ -200,8 +200,67 @@ void auton_close_corner_flick() {
     Robot::creepToDistance(inches(-56));
 }
 
-void auton_far_corner() {
+void auton_close_corner_safe() {
+    Robot::setHeading(134.5);
+
+    Robot::deployArm();
+    Robot::rotateToHeading(45, true);
+    Robot::rotateToHeading(135);
+    Robot::retractArm();
+
+    Robot::resetOdometer();
+    Robot::accelerate(-80, -80, 10);
+    Robot::waitUntilLeftDistance(inches(-10));
+    Robot::creepToDistance(inches(-18));
+
+    Robot::rotateToHeading(180);
+
+    Robot::resetOdometer();
+    Robot::accelerate(-80, -80, 100);
+    pros::delay(1000);
+    Robot::brake();
+
+    Robot::resetOdometer();
+    Robot::moveLift(127);
+    Robot::creepToDistance(inches(10));
+    Robot::moveLift(0);
+    Robot::rotateToHeading(90, true);
+
+    Robot::resetOdometer();
     Robot::engageParkingBrake();
+    Robot::accelerate(100, 100, 10);
+    pros::delay(2000);
+    Robot::brake();
+
+    Robot::rotateToHeading(110);
+}
+
+void auton_new_close_corner() {
+    Robot::setHeading(134.5);
+
+    Robot::resetOdometer();
+    Robot::creepToDistance(inches(-8));
+    Robot::rotateToHeading(60);
+    Robot::rotateToHeading(135, true);
+
+    // LEFT WING IN
+
+    /* Robot::rotateToHeading(90);
+
+    Robot::resetOdometer();
+    Robot::engageParkingBrake();
+    Robot::accelerate(100, 100, 10);
+    pros::delay(2000);
+    Robot::brake();
+
+    Robot::rotateToHeading(110); */
+}
+
+void auton_far_corner() {
+    Robot::moveLift(127);
+    pros::delay(300);
+    Robot::engageParkingBrake();
+    Robot::moveLift(0);
     Robot::enableIntake();
 
     Robot::resetOdometer();
@@ -242,13 +301,23 @@ void auton_far_corner() {
 
     Robot::accelerate(-90, -110, 100);
 
-    pros::delay(500);
+    pros::delay(750);
     Robot::brake();
     pros::delay(100);
 
     Robot::resetOdometer();
-    Robot::creepToDistance(inches(24));
+    Robot::creepToDistance(inches(6));
 
+    Robot::rotateToHeading(0);
+
+    Robot::resetOdometer();
+    Robot::accelerate(100, 100, 100);
+    Robot::waitUntilLeftDistance(inches(40));
+    Robot::creepToDistance(inches(50));
+
+    Robot::rotateToHeading(270, true);
+
+    Robot::accelerate(40, 25, 100);
 }
 
 void auton_far_center_rush() {
@@ -273,60 +342,105 @@ void auton_far_center_rush() {
     Robot::creepToDistance(inches(40)); */
 }
 
-void auton_skills() {
-    Robot::setHeading(133.5);
+void auton_new_far_corner() {
+    // DROP INTAKE
+    Robot::enableIntake();
+    Robot::resetOdometer();
+    Robot::creepToDistance(inches(10));
 
-    Robot::engageParkingBrake();
-    pros::delay(100);
-    Robot::disengageParkingBrake();
+    Robot::resetOdometer();
+    Robot::accelerate(-80, -80, 100);
+    Robot::waitUntilLeftDistance(inches(-20));
+    Robot::creepToDistance(inches(-30));
+    
+    Robot::rotateToHeading(160);
+    Robot::reverseIntake();
+    pros::delay(200);
+
+    Robot::rotateToHeading(90, true);
+
+    Robot::resetOdometer();
+    Robot::creepToDistance(inches(6));
+
+    Robot::rotateToHeading(330, true);
+
+    Robot::resetOdometer();
+    Robot::creepToDistance(inches(-5));
+
+    // DEPLOT LEFT WING
+    pros::delay(3000);
+
+    Robot::creepToDistance(inches(-14));
+    Robot::rotateToHeading(230, true);
+
+    Robot::rotateToHeading(275);
+    // RETRACT LEFT WING
+    pros::delay(3000);
+
+    Robot::rotateToHeading(330);
+
+    Robot::resetOdometer();
+    Robot::accelerate(-120, -40, 100);
+
+    pros::delay(1500);
+    Robot::brake();
+    pros::delay(250);
+    Robot::creepToDistance(inches(8));
+    Robot::rotateToHeading(0);
+
+    Robot::resetOdometer();
+    Robot::accelerate(80, 65, 100);
+}
+
+void auton_skills() {
+    Robot::setHeading(132.5);
+
     Robot::deployArm();
     Robot::moveLift(127);
 
     Robot::resetOdometer();
-    Robot::accelerate(-100, -100, 100);
-    Robot::waitUntilLeftDistance(inches(-5));
-    Robot::creepToDistance(inches(-15));
+    Robot::accelerate(-80, -100, 100);
+    Robot::waitUntilLeftDistance(inches(-10));
+    Robot::creepToDistance(inches(-20));
 
-    Robot::rotateToHeading(80, true);
+    Robot::rotateToHeading(83, true);
 
-    for (int i = 0; i < 10; i++) { //70
-        Robot::launchKickerFast();
-    }
+    Robot::runKickerForTime(35000); // 35000
 
-    Robot::retractArm();
     Robot::moveLift(-127);
-    Robot::accelerate(120, -120, 0);
-    pros::delay(150);
+    Robot::engageParkingBrake();
+    Robot::retractArm();
     Robot::rotateToHeading(135);
 
     Robot::resetOdometer();
-    Robot::accelerate(40, 40, 100);
-    Robot::waitUntilLeftDistance(inches(8));
-    Robot::accelerate(20, 80, 100);
-    Robot::waitUntilLeftDistance(inches(15));
-    Robot::creepToDistance(inches(20));
+    Robot::creepToDistance(inches(7));
+
+    pros::Task _ ([=] {
+        Robot::runKickerToRotation(7000);
+    });
+    Robot::reverseIntake();
 
     Robot::resetOdometer();
-    Robot::accelerate(60, 60, 100);
-    Robot::waitUntilLeftDistance(inches(15));
-    Robot::launchKickerFast();
-    Robot::launchKickerFast();
+    Robot::accelerate(50, 80, 100);
+    Robot::waitUntilLeftDistance(inches(29));
+    Robot::accelerate(80, 80, 10);
     Robot::waitUntilLeftDistance(inches(80));
     Robot::brake();
+    Robot::coastKicker();
 
-    Robot::rotateToHeading(-120, true);
-
+    Robot::rotateToHeading(270, true);
     Robot::deployArm();
-    Robot::accelerate(-120, -60, 100);
 
-    pros::delay(1500);
+    Robot::accelerate(-120, -90, 10);
 
-    Robot::resetOdometer();
-    Robot::creepToDistance(inches(20));
+    pros::delay(2500);
 
-    Robot::accelerate(-120, -120, 100);
+    Robot::rotateToHeading(200);
+    Robot::accelerate(60, 60, 10);
+    pros::delay(500);
+    Robot::accelerate(-120, -120, 10);
 }
 
 void autonomous() {
-    auton_skills();
+    auton_new_close_corner();
 }

@@ -20,17 +20,24 @@ namespace Robot {
     extern void reverseIntake           (void);
     extern void reverseIntakeSlow       (void);
     extern void disableIntake           (void);
-    extern void launchKickerOnce        (void);
-    extern void launchKickerFast        (void);
+    extern void resetKickerSensor       (void);
+    extern void runKicker               (void);
+    extern void brakeKicker             (void);
+    extern void coastKicker             (void);
+    extern void runKickerForTime        (int ms);
+    extern void runKickerToRotation     (int rotation);
     extern void moveLift                (int mult);
  
     extern bool isArmDeployed; 
-    extern bool isParkingBrakeEngaged; 
+    extern bool isParkingBrakeEngaged;
+    extern bool isWingsDeployed; 
     extern void deployArm               (void);
     extern void retractArm              (void);
     extern void toggleArmDeployment     (void);
     extern void engageParkingBrake      (void);
     extern void disengageParkingBrake   (void);
     extern void toggleParkingBrakeEngage(void);
-
+    extern void deployWings             (void);
+    extern void retractWings            (void);
+    extern void toggleWingDeployment    (void);
 }
