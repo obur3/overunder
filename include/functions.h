@@ -37,7 +37,12 @@ namespace Robot {
     extern void engageParkingBrake      (void);
     extern void disengageParkingBrake   (void);
     extern void toggleParkingBrakeEngage(void);
+    extern void deployLeftWing          (void);
+    extern void retractLeftWing         (void);
+    extern void deployRightWing         (void);
+    extern void retractRightWing        (void);
     extern void deployWings             (void);
     extern void retractWings            (void);
     extern void toggleWingDeployment    (void);
+    extern void dropIntake              (void);
 }

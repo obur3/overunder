@@ -242,18 +242,6 @@ void auton_new_close_corner() {
     Robot::creepToDistance(inches(-8));
     Robot::rotateToHeading(60);
     Robot::rotateToHeading(135, true);
-
-    // LEFT WING IN
-
-    /* Robot::rotateToHeading(90);
-
-    Robot::resetOdometer();
-    Robot::engageParkingBrake();
-    Robot::accelerate(100, 100, 10);
-    pros::delay(2000);
-    Robot::brake();
-
-    Robot::rotateToHeading(110); */
 }
 
 void auton_far_corner() {
@@ -343,7 +331,9 @@ void auton_far_center_rush() {
 }
 
 void auton_new_far_corner() {
-    // DROP INTAKE
+    Robot::dropIntake();
+
+    
     Robot::enableIntake();
     Robot::resetOdometer();
     Robot::creepToDistance(inches(10));
@@ -367,15 +357,13 @@ void auton_new_far_corner() {
     Robot::resetOdometer();
     Robot::creepToDistance(inches(-5));
 
-    // DEPLOT LEFT WING
-    pros::delay(3000);
+    Robot::deployLeftWing();
 
     Robot::creepToDistance(inches(-14));
     Robot::rotateToHeading(230, true);
 
     Robot::rotateToHeading(275);
-    // RETRACT LEFT WING
-    pros::delay(3000);
+    Robot::retractLeftWing();
 
     Robot::rotateToHeading(330);
 

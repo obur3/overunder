@@ -299,16 +299,32 @@ void toggleParkingBrakeEngage() {
     }
 }
 
+void deployLeftWing() {
+    piston_leftWing .set_value(true);
+}
+
+void retractLeftWing() {
+    piston_leftWing .set_value(false);
+}
+
+void deployRightWing() {
+    piston_rightWing.set_value(true);
+}
+
+void retractRightWing() {
+    piston_rightWing.set_value(false);
+}
+
 void deployWings() {
     isWingsDeployed = true;
-    piston_leftWing .set_value(true);
-    piston_rightWing.set_value(true);
+    deployLeftWing();
+    deployRightWing();
 }
 
 void retractWings() {
     isWingsDeployed = false;
-    piston_leftWing .set_value(false);
-    piston_rightWing.set_value(false);
+    deployLeftWing();
+    deployRightWing;
 }
 
 void toggleWingDeployment() {
@@ -317,6 +333,10 @@ void toggleWingDeployment() {
     } else {
         deployWings();
     }
+}
+
+void dropIntake() {
+    
 }
 
 }
