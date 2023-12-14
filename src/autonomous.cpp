@@ -238,10 +238,9 @@ void auton_close_corner_safe() {
 void auton_new_close_corner() {
     Robot::setHeading(134.5);
 
+    Robot::deployRightWing();
     Robot::resetOdometer();
-    Robot::creepToDistance(inches(-8));
-    Robot::rotateToHeading(60);
-    Robot::rotateToHeading(135, true);
+    Robot::accelerate(-70, -100, 100);
 }
 
 void auton_far_corner() {
@@ -333,7 +332,7 @@ void auton_far_center_rush() {
 void auton_new_far_corner() {
     Robot::dropIntake();
 
-    
+
     Robot::enableIntake();
     Robot::resetOdometer();
     Robot::creepToDistance(inches(10));
